@@ -231,7 +231,7 @@ function ControlsHUD({ isLocked }) {
 }
 
 /* ─── Main Canvas Export ─── */
-export default function ExhibitionCanvas({ theme }) {
+export default function ExhibitionCanvas({ modelUrl }) {
   const [isLocked, setIsLocked] = useState(false);
   const controlsRef = useRef();
 
@@ -267,7 +267,7 @@ export default function ExhibitionCanvas({ theme }) {
           onLock={handleLock}
           onUnlock={handleUnlock}
         />
-        <Scene theme={theme} />
+        <Scene modelUrl={modelUrl} />
       </Canvas>
       <ControlsHUD isLocked={isLocked} />
     </div>

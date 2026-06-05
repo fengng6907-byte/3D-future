@@ -91,18 +91,33 @@ function Spinner() {
 export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [activeTheme, setActiveTheme] = useState(null);
+  const [modelUrl, setModelUrl] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleGenerate = useCallback(() => {
+  const handleGenerate = useCallback(async () => {
     if (!prompt.trim() || isGenerating) return;
     setIsGenerating(true);
+    setError(null);
 
-    /* Simulate a generation delay for the build process —
-       in production this would call an AI generation endpoint */
-    setTimeout(() => {
-      setActiveTheme(prompt.trim());
+    try {
+      const res = await fetch("/api/generate-room", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: prompt.trim() }),
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error (${res.status})`);
+      }
+
+      const data = await res.json();
+      setModelUrl(data.modelUrl);
+    } catch (err) {
+      setError(err.message);
+    } finally {
       setIsGenerating(false);
-    }, 2200);
+    }
   }, [prompt, isGenerating]);
 
   const handleKeyDown = useCallback(
@@ -224,8 +239,24 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Active Theme Indicator */}
-        {activeTheme && (
+        {/* Error Display */}
+        {error && (
+          <div
+            className="mt-4 rounded-xl p-4"
+            style={{
+              background: "rgba(239, 68, 68, 0.06)",
+              border: "1px solid rgba(239, 68, 68, 0.2)",
+              animation: "fadeIn 0.4s ease-out",
+            }}
+          >
+            <p className="text-xs" style={{ color: "#ef4444" }}>
+              {error}
+            </p>
+          </div>
+        )}
+
+        {/* Active Environment Indicator */}
+        {modelUrl && (
           <div
             className="mt-6 rounded-xl p-4"
             style={{
@@ -256,7 +287,7 @@ export default function Home() {
               className="text-xs leading-relaxed"
               style={{ color: "#6b6f83" }}
             >
-              {activeTheme}
+              {prompt}
             </p>
           </div>
         )}
@@ -275,8 +306,8 @@ export default function Home() {
 
       {/* ─── Right 3D Viewport (3/4) ─── */}
       <main className="flex-1 h-full relative" style={{ background: "#0b0c10" }}>
-        {activeTheme ? (
-          <ExhibitionCanvas theme={activeTheme} />
+        {modelUrl ? (
+          <ExhibitionCanvas modelUrl={modelUrl} />
         ) : (
           /* Empty state before generation */
           <div className="flex items-center justify-center h-full">
