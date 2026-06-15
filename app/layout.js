@@ -1,14 +1,14 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "VIBE-SPACE 3D — Immersive Event Visualization",
+  title: "DairyBook — Our Shared Journal",
   description:
-    "Transform event concepts into immersive 3D walkthroughs for live client pitches.",
+    "A private, couple-only digital journal for capturing moments together.",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body className="antialiased">{children}</body>
     </html>
   );
